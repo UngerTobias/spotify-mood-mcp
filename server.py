@@ -55,14 +55,19 @@ def create_mood_playlist(user_id: str, queries: list[str], description: str, pla
     wiedererkenne?" und merke dir die Antwort für zukünftige Gespräche mit dieser Person.
     Nutze exakt diesen Namen als user_id bei jedem weiteren Aufruf dieses Tools.
 
-    Falls die Funktion zurückgibt, dass der Nutzer nicht verbunden ist: du MUSST den
-    vollständigen, fertig ausgefüllten Link als klickbare URL ausgeben, z.B.
-    "https://spotify-mood-mcp.onrender.com/login/tobi" - NIEMALS nur den Pfad
-    "/login/tobi" oder Platzhalter wie "<user_id>" nennen und den Nutzer bitten, das
-    selbst zusammenzusetzen oder danach zu suchen. Der Nutzer soll den Link nur noch
-    anklicken müssen, ohne selbst etwas anpassen oder nachdenken zu müssen. Ersetze
-    <user_id> in der URL immer durch die exakte user_id, die du gerade für diese
-    Person festgelegt hast, bevor du den Link ausgibst.
+    Falls die Funktion zurückgibt, dass der Nutzer nicht verbunden ist: du MUSST eine
+    echte, funktionierende URL ausgeben, indem du user_id in folgendem Muster ersetzt:
+
+    https://spotify-mood-mcp.onrender.com/login/USER_ID_HIER
+
+    Beispiel: bei user_id="tobi" gibst du exakt aus:
+    https://spotify-mood-mcp.onrender.com/login/tobi
+
+    NIEMALS "<server-url>", "<user_id>" oder ähnliche Platzhalter in Spitzklammern
+    wörtlich in deiner Antwort ausgeben - das sind nur Beschreibungen für dich, keine
+    Texte die der Nutzer sehen soll. Nutze immer https (nicht http) und genau die
+    Domain spotify-mood-mcp.onrender.com. Der Nutzer soll ausschließlich auf einen
+    fertigen, klickbaren Link treffen, den er ohne jede eigene Anpassung anklicken kann.
 
     WICHTIG - queries selbst formulieren:
     Überlege dir konkrete, dir bekannte Songs (Titel + Künstler), die zur Anfrage passen -
