@@ -86,4 +86,4 @@ def create_mood_playlist(user_id: str, mood: str, description: str) -> str:
     return f'Neue Playlist "Claude-{mood}" erstellt mit {len(track_uris)} Songs.'
 
 
-app.mount("/mcp", mcp.streamable_http_app())
+app.mount("/", mcp.streamable_http_app())
