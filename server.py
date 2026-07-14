@@ -8,7 +8,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.server.transport_security import TransportSecuritySettings
 from contextlib import asynccontextmanager
 
-from spotify_client import get_spotify_client, search_tracks_by_mood, create_playlist, add_tracks_to_playlist
+from spotify_client import get_spotify_client, search_tracks_by_queries, create_playlist, add_tracks_to_playlist
 from auth import refresh_access_token
 
 import time
@@ -44,9 +44,9 @@ def callback(code: str, state: str):
 
 
 @mcp.tool()
-def create_mood_playlist(user_id: str, mood: str, description: str) -> str:
+def create_mood_playlist(user_id: str, queries: list[str], description: str, playlist_name: str) -> str:
     """
-    Erstellt eine neue Spotify-Playlist für einen bestimmten Nutzer, passend zu einer Stimmung.
+    Erstellt eine neue Spotify-Playlist für einen bestimmten Nutzer, passend zu seinem Wunsch.
 
     WICHTIG - user_id ermitteln:
     Falls du für diese Person noch keinen gespeicherten Namen/user_id kennst
@@ -55,25 +55,38 @@ def create_mood_playlist(user_id: str, mood: str, description: str) -> str:
     wiedererkenne?" und merke dir die Antwort für zukünftige Gespräche mit dieser Person.
     Nutze exakt diesen Namen als user_id bei jedem weiteren Aufruf dieses Tools.
 
-    Falls die Funktion zurückgibt, dass der Nutzer nicht verbunden ist: teile ihr/ihm
-    mit, dass er/sie einmalig auf https://spotify-mood-mcp.onrender.com/login/<user_id> gehen muss
-    (ersetze <user_id> durch die exakte user_id, die ihr gerade festgelegt habt), um Claude
-    einmalig mit Spotify zu verbinden. Gib den kompletten, klickbaren Link direkt aus, nicht
-    nur den Platzhaltertext.
+    Falls die Funktion zurückgibt, dass der Nutzer nicht verbunden ist: du MUSST den
+    vollständigen, fertig ausgefüllten Link als klickbare URL ausgeben, z.B.
+    "https://spotify-mood-mcp.onrender.com/login/tobi" - NIEMALS nur den Pfad
+    "/login/tobi" oder Platzhalter wie "<user_id>" nennen und den Nutzer bitten, das
+    selbst zusammenzusetzen oder danach zu suchen. Der Nutzer soll den Link nur noch
+    anklicken müssen, ohne selbst etwas anpassen oder nachdenken zu müssen. Ersetze
+    <user_id> in der URL immer durch die exakte user_id, die du gerade für diese
+    Person festgelegt hast, bevor du den Link ausgibst.
+
+    WICHTIG - queries selbst formulieren:
+    Überlege dir konkrete, dir bekannte Songs (Titel + Künstler), die zur Anfrage passen -
+    keine abstrakten Genre- oder Stimmungswörter. Formuliere jede Query als "<Songtitel>
+    <Künstlername>", z.B. "Rumble Skrillex Fred again", "The Search NF". Wenn ein bestimmter
+    Künstler genannt wurde, wähle mehrere unterschiedliche bekannte Songs von genau diesem
+    Künstler. Wenn kein Künstler genannt wurde, überlege dir Songs verschiedener Künstler,
+    die zur gewünschten Stimmung/zum Anlass passen. Baue 5-8 Queries für eine abwechslungsreiche
+    Playlist. Beispiel: Nutzer will "Sport-Playlist mit NEFFEX-Songs" ->
+    queries=["Fight Back NEFFEX", "Rumors NEFFEX", "Rebel NEFFEX", "Rockstar NEFFEX",
+    "Rage NEFFEX", "Rise NEFFEX"].
 
     Args:
         user_id: Ein eindeutiger, selbstgewählter Name für diese Person (z.B. "tobi",
                  "basti"). Muss bei jedem Aufruf für dieselbe Person identisch sein.
-        mood: Die gewünschte Stimmung/das Genre für die Playlist. Funktioniert am besten
-              mit kurzen, gängigen englischen Begriffen, die auch als Spotify-Suchbegriff
-              Sinn ergeben, z.B. "chill", "energetic", "sad", "focus", "party", "workout",
-              "melancholic", "upbeat". Leite den passendsten Begriff aus dem Gesprächskontext
-              ab, auch wenn der Nutzer es anders formuliert (z.B. "mir ist nach Runterkommen"
-              → mood="chill").
+        queries: Liste von 5-8 Suchbegriffen im Format "<Songtitel> <Künstler>", die konkrete,
+                 dir bekannte Songs beschreiben (siehe Hinweis oben) - keine Genre- oder
+                 Stimmungswörter. Jede Query wird einzeln durchsucht, die Ergebnisse werden zu
+                 einer Playlist zusammengeführt.
         description: Eine kurze, für Menschen lesbare Beschreibung der Playlist (1 Satz),
-                     die du selbst aus dem Gesprächskontext formulierst - nicht einfach
-                     den mood-Wert wiederholen. Z.B. "Ruhige Songs zum Entspannen nach
-                     einem stressigen Tag."
+                     die du selbst aus dem Gesprächskontext formulierst. Z.B. "Energiegeladene
+                     NEFFEX-Songs fürs Workout."
+        playlist_name: Ein passender, kurzer Name für die Playlist, den du selbst aus dem
+                      Gesprächskontext ableitest (z.B. "Workout Motivation", "Chill Vibes").
 
     Returns:
         Eine Bestätigungsnachricht, oder ein Hinweis falls der Nutzer sich erst noch
@@ -93,11 +106,11 @@ def create_mood_playlist(user_id: str, mood: str, description: str) -> str:
         access_token = tokens["access_token"]
     
     spotify_client = get_spotify_client(access_token)
-    track_uris = search_tracks_by_mood(spotify_client, mood)
-    playlist_id = create_playlist(spotify_client, f"Claude-{mood}", description)
+    track_uris = search_tracks_by_queries(spotify_client, queries)
+    playlist_id = create_playlist(spotify_client, playlist_name, description)
     add_tracks_to_playlist(spotify_client, playlist_id, track_uris)
     
-    return f'Neue Playlist "Claude-{mood}" erstellt mit {len(track_uris)} Songs.'
+    return f'Neue Playlist "{playlist_name}" erstellt mit {len(track_uris)} Songs.'
 
 
 app.mount("/", mcp.streamable_http_app())

@@ -1,30 +1,19 @@
 import spotipy
 
-MOOD_TO_GENRES = {
-    "chill": ["chill", "ambient", "lo-fi"],
-    "energetic": ["dance", "edm", "electropop"],
-    "sad": ["sad", "acoustic", "singer-songwriter"],
-    "focus": ["study", "ambient", "classical"],
-    "party": ["party", "dance", "hip-hop"],
-    "workout": ["work-out", "edm", "hip-hop"],
-    "melancholic": ["sad", "indie", "singer-songwriter"],
-    "upbeat": ["pop", "dance", "happy"],
-}
 
 def get_spotify_client(access_token: str):
     return spotipy.Spotify(auth=access_token)
 
 
-def search_tracks_by_mood(sp: spotipy.Spotify, mood: str, limit: int = 10) -> list:
-    genres = MOOD_TO_GENRES.get(mood.lower(), [mood])
-    tracks_per_genre = max(1, limit // len(genres))
+def search_tracks_by_queries(sp: spotipy.Spotify, queries: list[str], limit: int = 10) -> list:
+    tracks_per_query = max(1, limit // len(queries))
     
     track_uris = []
-    for genre in genres:
-        results = sp.search(q=f'genre:{genre}', type="track", limit=tracks_per_genre)
+    for query in queries:
+        results = sp.search(q=query, type="track", limit=tracks_per_query)
         for track in results["tracks"]["items"]:
             track_uris.append(track["uri"])
-        
+    
     return track_uris[:limit]
 
 
