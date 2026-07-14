@@ -84,3 +84,6 @@ def create_mood_playlist(user_id: str, mood: str, description: str) -> str:
     add_tracks_to_playlist(spotify_client, playlist_id, track_uris)
     
     return f'Neue Playlist "Claude-{mood}" erstellt mit {len(track_uris)} Songs.'
+
+
+app.mount("/mcp", mcp.streamable_http_app())
