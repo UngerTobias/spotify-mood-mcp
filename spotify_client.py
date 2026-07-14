@@ -16,10 +16,13 @@ def search_tracks_by_mood(sp: spotipy.Spotify, mood: str, limit: int = 10) -> li
 
 
 def create_playlist(sp: spotipy.Spotify, name: str, description: str = "", public: bool = True) -> str:
-    spotify_user = sp.current_user()
-    spotify_userid = spotify_user["id"]
+    payload = {
+        "name": name,
+        "public": public,
+        "description": description
+    }
     
-    playlist = sp.user_playlist_create(spotify_userid, name, public, description)
+    playlist = sp._post("me/playlists", payload=payload)
     playlist_id = playlist["id"]
     
     return playlist_id
