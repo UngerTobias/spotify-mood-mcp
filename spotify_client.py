@@ -4,7 +4,7 @@ def get_spotify_client(access_token: str):
     return spotipy.Spotify(auth=access_token)
 
 
-def search_tracks_by_mood(sp: spotipy.Spotify, mood: str, limit: int = 20) -> list:
+def search_tracks_by_mood(sp: spotipy.Spotify, mood: str, limit: int = 10) -> list:
     results = sp.search(q=mood, type="track", limit=limit)
     
     track_uris = []
