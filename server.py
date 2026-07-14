@@ -5,14 +5,21 @@ from auth import get_auth_url, exchange_code_for_tokens
 from db import init_db, save_tokens, get_tokens
 
 from mcp.server.fastmcp import FastMCP
+from contextlib import asynccontextmanager
 
 from spotify_client import get_spotify_client, search_tracks_by_mood, create_playlist, add_tracks_to_playlist
 from auth import refresh_access_token
 
 import time
 
-app = FastAPI()
 mcp = FastMCP("spotify-mood")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with mcp.session_manager.run():
+        yield
+        
+app = FastAPI(lifespan=lifespan)
 
 init_db()
 
