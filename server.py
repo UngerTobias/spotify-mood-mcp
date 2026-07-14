@@ -56,9 +56,10 @@ def create_mood_playlist(user_id: str, mood: str, description: str) -> str:
     Nutze exakt diesen Namen als user_id bei jedem weiteren Aufruf dieses Tools.
 
     Falls die Funktion zurückgibt, dass der Nutzer nicht verbunden ist: teile ihr/ihm
-    mit, dass er/sie einmalig auf http://<server-url>/login/<user_id> gehen muss
-    (mit genau der user_id, die ihr gerade festgelegt habt), um Claude einmalig mit
-    Spotify zu verbinden.
+    mit, dass er/sie einmalig auf https://spotify-mood-mcp.onrender.com/login/<user_id> gehen muss
+    (ersetze <user_id> durch die exakte user_id, die ihr gerade festgelegt habt), um Claude
+    einmalig mit Spotify zu verbinden. Gib den kompletten, klickbaren Link direkt aus, nicht
+    nur den Platzhaltertext.
 
     Args:
         user_id: Ein eindeutiger, selbstgewählter Name für diese Person (z.B. "tobi",
